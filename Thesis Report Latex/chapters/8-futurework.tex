@@ -1,0 +1,20 @@
+\chapter{Future work}
+
+The thesis presented a working citation recommendation system, but there are multiple areas in which further research can be carried out. These areas will be touched upon in this chapter. 
+
+Of course, a hybrid or ensemble algorithm is only as good as its components. While BM25 and hd2vOUT are used for this hybrid model, more complex deep learning-based algorithms could be used to further improve the quality of citation recommendations. 
+
+Another set of algorithms which could be used in the hybrid model could be semantic algorithms which work based on specific components in a citation context. It can help to identify if a concept has been defined in the citation context, or if a certain claim has been made. We can then use a separate algorithm for recommending citations for a concept and for a claim. This would then need the creation a 'switching' hybrid recommender system as described in \cite{Burke2002}. 
+
+A classifier to identify citation context types was built while doing work on the thesis, but it was trained on a very small data set and it was not clear if it would generalise well. So it wasn't used. This classifier, if it works satisfactorily, should be able to identify concepts and claims as well as 'incomplete' contexts -- contexts for which no valid recommendation can be made. These contexts can then automatically be discarded during the training phase. Better quality training data leads to better results. 
+
+The case study in Section 6.2.4 showed that the BM25 algorithm worked much better when a cited paper's content was made up of citation contexts from papers which cite it. This is in line with observations made in \cite{HuangKCMGR12}. 
+Hybrid23, the hybrid recommender system built based on this case study, performed better than all its components. The weights in the weighted hybridisation algorithm can be tuned further, which might improve the results. 
+This case study can be tested futher by creating more data sets other than MAG, including some based on full-text data sets. This will need extraction of citation contexts from citing papers, and inserting them in the cited papers. 
+
+There are a number of other possibilities for future work relating to this thesis. It would be an interesting exercise to compare citation recommendation across different disciplines. This thesis uses computer science, but it might be the case that a discipline in the humanities may work better with citation recommendation.
+This could also then lead to further research on obtaining cross-domain recommendations. In a world where the lines between disciplines are increasingly being blurred, this might be very useful as researchers would be introduced to areas of study he/she hadn't thought about. 
+
+Another road we could travel down would be to attempt to tackle the problem of cross-language recommendation -- recommending English citations for French and German papers for example. Cross-language recommendation in English/Chinese has been explored by many authors in existing research (\cite{TangWZ14,JiangLL18, JiangYGLL18}). The ability to recommend papers in a different language would add an additional dimension to the citation recommendation system. Embedding-based models in theory should work well with cross-language recommendation as embeddings are not language-specific by nature. Information retrieval approaches will not work well, so an alternative will have to be found in this case. 
+
+All in all, there is plenty of scope for future work on this topic.

@@ -1,0 +1,42 @@
+\chapter{Introduction}\label{chap:introduction}
+\section{Motivation}
+Citations are the lifeblood of academic research papers. They provide a measure of trustworthiness, and can be used to either back up the authors’ claims using earlier research, to improve upon existing methods, or even to criticise research done previously. Moreover, citations are a way for researchers to give their readers an opportunity to compare and contrast the research in their papers with the research of other authors. 
+
+%TODO This doesn't lead into the next para properly
+The number of new scientific publications has been on a steep upward curve in recent years (detailed statistics in \cite{stm2008}). While this has made research more accessible than at any point in history, it has also made the researcher's task of finding a suitable paper to refer to and cite more difficult than ever before. All this has led to an increased amount of research being done on citation recommendation -- the process of finding and recommending prior work based on a passage of text.
+This passage of text, usually called the \textit{citation context}, can be of different lengths: from a phrase or sentence, to a few sentences, to a paragraph or two.
+
+\section{Problem setting}
+If recommendations are made for the entire paper, the recommendations are \textit{global} and coarse-grained. Some of the earliest papers on citation recommendation covered global citation recommendation (~\cite{McNeeACGLRKR02}, ~\cite{StrohmanCJ07} and \cite{NallapatiAXC08}), but it has also been researched in multiple papers recently, for example, in ~\cite{Bhagavatula2018}, ~\cite{YangZCDMGD18} and \cite{CaiHY18}.
+
+In this thesis, however, we will focus more on \textit{local citation recommendation}, in which a relatively small citation context (1-3 sentences or 50-100 words, for instance) is used. This type of fine-grained recommendation, sometimes also referred to as \textit{context-aware citation recommendation} in contemporary research papers, was first explored in \cite{He2010} and \cite{He2011}. 
+
+This thesis will use the Microsoft Academic Graph (MAG) data set \cite{Sinha2015}, which has not been used in any of the papers in the area of local citation recommendation. Two papers have used the old version of Microsoft Academic in 2015 (\cite{ChakrabortyMNN15, Gao15}). However, both these papers do not implement local citation recommendation. 
+
+Another important point to mention here is that there are 'personalised' approaches such as \cite{Ebesu2017} and \cite{YangZCDMGD18} which use the author and venue metadata as input for their algorithms. These obtain better scores on the evaluation metrics. However, as explained in \cite{Bhagavatula2018}, this is due to the fact that prediction of obvious citations (citations by the same author, for example) result in better scores on the metrics. This thesis will not consider such personalised approaches.
+
+Now that we have seen what problem this thesis attempts to solve, it's time to briefly outline the methods that will be used to solve this problem in the next section.
+\section{Method}
+In conjunction with the data set prepared from MAG (which will be made available to the public), we will adapt different approaches to the problem of citation recommendation -- \textit{embedding approaches}, topic modelling approaches and standard Information Retrieval approaches. These will be discussed in detail in the following chapters.
+
+A number of data sets based on the MAG are prepared, with restrictions made on the language and discipline (English and Computer Science respectively). The other data sets used are the Arxiv data set~\footnote{https://arxiv.org/}, the ACL-ARC data set~\cite{BirdDDGJKLPRT08} and a data set created from the open Unpaywall database~\footnote{https://unpaywall.org}. All of these are mapped to the MAG, combined with it, and made publicly available as well. 
+
+Two existing deep-learning based embedding methods are adapted: one based on the Hyperdoc2vec paper by Han et al \cite{ShiSZZH18} and the other based on the Paper2vec paper by Ganguly et al \cite{GangulyP17}. In addition, a BM25-based recommender is prepared, along with baselines based on Latent Dirichlet Allocation (LDA) \cite{BleiNJ03} and Paragraph Vectors \cite{LeM14}. The best-performing methods are finally combined in a weighted hybrid recommendation system, which improves scores on the metrics markedly. 
+
+The evaluation consists of two phases, an offline and an online one. The metrics used are ones which are commonly used in recommender systems research: MAP, Recall, MRR and NDCG. These metrics are calculated at different values of k for all the data sets.
+While the offline evaluation phase provides one measure of how well the recommender system works, it is useful to have an online phase to manually judge the quality of recommendation results. Even if the list of recommendations does not contain the papers present in the ground truth, it is possible that the results might still be relevant. The online evaluation is therefore implemented as a user study. Here, randomly sampled citation contexts from the MAG test set are used to make predictions based on the aforementioned algorithms, and the results are evaluated manually.
+
+Finally, a running citation recommendation system is created, with two hybrid models (based on two different MAG data sets) plugged in. This system, which gives the user options to restrict recommendations based on the number of citations, is made available to the public .
+\section{Contributions}\label{sec:contributions}
+The contributions of this thesis are as follows:
+\begin{enumerate}
+    \item A hybrid citation recommendation system built from recommendation algorithms based on Information Retrieval neural network embeddings.
+    \item Offline and online evaluation of the hybrid recommender as well as its component algorithms based on the MAG data set, which hasn't been used in any local citation recommendation papers so far.
+    \item Combination of existing full-text data sets with MAG to create new data sets for offline evaluation.
+    \item A case study to prove that citation contexts describe the cited paper more than the citing paper. A special MAG data set is created for this purpose which has the citation contexts of a citing paper in the cited paper's content.
+    \item \textit{HybridCite}, a running online citation recommendation system based on the hybrid embedding-information retrieval model. This system is made available to the public.
+\end{enumerate}
+\section{Document structure}\label{sec:documentstructure}
+The rest of the thesis is organised as follows. In Chapter 2, we look at the related work. Chapter 3 explains the concepts used in the thesis and defines important terms. Chapter 4 talks about the MAG data set as well as the other data sets created after mapping to MAG. In Chapter 5, we discuss the methodology and explain the methods and algorithms used for citation recommendation in detail. The running recommender system, HybridCite, is described at the end of this chapter.
+Chapter 6 describes the evaluation metrics used as well as the offline and online evaluation. This chapter contains graphs showing the evaluation results of the various algorithms on the various data sets, as well as a case study to show that citation contexts describe the cited paper more than the citing paper.
+The conclusion and future work chapters (chapters 7 and 8) round off the thesis.

@@ -1,0 +1,108 @@
+\chapter{Offline evaluation data filter criteria}\label{chap:offlineevalfilter}
+
+Table~\ref{tab:datasetfilter} details the filter criteria used while choosing the final list of papers for each training set. The MAG data set is based on a snapshot from February 2019 provided by Microsoft. During preparation of the Unpaywall-MAG data set, a JSONlines file from September 2018 is was used. The Arxiv portion of the Arxiv-MAG data set is from the data set described in Saier et al.~\cite{SaierF19}. An earlier version of this data set, which contains papers up until 2017, was used in the Arxiv-MAG data preparation phase. The ACL-ARC data in the ACL-MAG data set uses the same data used in Färber et al.~\cite{Faerber2018b} \footnote{This data is available at \url{http://citation-recommendation.org/publications/#To_Cite_or_Not_to_Cite}}.
+
+\begin{table}
+\centering
+    \caption{Filter criteria for offline evaluation data.}
+    \label{tab:datasetfilter}
+\begin{center}
+    \begin{tabular}{lp{11.5cm}}
+    \toprule
+    Data set & Filter criteria\\
+    \midrule
+    MAG & Training set papers were chosen from the field of Computer Science. Only English papers were chosen. The abstract in the MAG database was non-null for the chosen papers. The papers in the training set are from 1800 to 2017 (the test set used contexts from 2018 and 2019).\\
+    \midrule
+    MAG50 & Training set papers were chosen from the field of Computer Science. Only English papers were chosen. The abstract in the MAG database was non-null for the chosen papers. The papers in the training set are from 1800 to 2017 and should have been cited at least 50 times. The test set used contexts from 2018 and 2019. \\
+    \midrule
+    Unpaywall-MAG & Training set papers were chosen from the field of computer science. Only English papers were chosen. The abstract in the MAG database was non-null for the chosen papers. The papers in the training set are from 1800 to 2017. Of these papers, the final list of chosen papers were those which could be (i) downloaded using the links provided by Unpaywall, (ii) converted into full text using Grobid~\cite{GROBID}. The additional MAG papers fetched are those cited by the Arxiv papers which are in the MAG data set as well as those cited by \textit{these MAG papers}. The test set contained MAG citation contexts from 2018 and 2019. \\
+    \midrule
+    Arxiv-MAG & Training set papers were chosen from the field of computer science in the Arxiv data set such that they have at least 5 citing documents within the data set. The papers are from 1991-2016. The additional MAG papers fetched are those cited by the Arxiv papers which are in the MAG data set as well as those cited by \textit{these MAG papers}. The test set used Arxiv citation contexts from 2017.\\
+    \midrule
+    ACL-MAG & Training set papers chosen from the ACL-ARC data set should have been mapped to a DBLP ID. The papers are from the years 1965-2005. The additional MAG papers fetched are those cited by the ACL-ARC papers which are in the MAG data set as well as those cited by \textit{these MAG papers}. The test set contained ACL-ARC citation contexts from 2006.\\
+    \bottomrule
+    \end{tabular}
+\end{center}
+\end{table}
+
+\chapter{Preprocessing}\label{chap:preprocessing}
+
+Preprocessing is an extremely important step while using embedding algorithms like Hyperdoc2vec. The common preprocessing steps used for Hyperdoc2vec and Paper2Vec before both training and prediction are:
+
+1. Expand contractions: In this step, "isn't" is expanded to is not, "aren't" is expanded to are not, and so on. The contractions are expanded using the 'contractions' package in Python.
+
+2. Remove punctuation and special characters (this is also important for the BM25 indexing and prediction).
+
+3. Remove additional white spaces
+
+4. Remove stop words: algorithms like Doc2Vec, Word2Vec, and HyperDoc2vec work on the principle that a word is described by the 'company it keeps', i.e., the words it commonly co-occurs with. 
+So the stop words removed play an important role in deciding the company each word keeps.
+In this thesis, we remove stop words very aggressively. The stop word list is taken from \cite{StoneDK11} and is given in its entirety below.
+
+all, six, just, less, being, indeed, over, move, anyway, four, not, own, through, using, fifty, where, mill, only, find, before, one, whose, system, how, somewhere, much, thick, show, had, enough, should, to, must, whom, seeming, yourselves, under, ours, two, has, might, thereafter, latterly, do, them, his, around, than, get, very, de, none, cannot, every, un, they, front, during, thus, now, him, nor, name, regarding, several, hereafter, did, always, who, didn, whither, this, someone, either, each, become, thereupon, sometime, side, towards, therein, twelve, because, often, ten, our, doing, km, eg, some, back, used, up, go, namely, computer, are, further, beyond, ourselves, yet, out, even, will, what, still, for, bottom, mine, since, please, forty, per, its, everything, behind, does, various, above, between, it, neither, seemed, ever, across, she, somehow, be, we, full, never, sixty, however, here, otherwise, were, whereupon, nowhere, although, found, alone, re, along, quite, fifteen, by, both, about, last, would, anything, via, many, could, thence, put, against, keep, etc, amount, became, ltd, hence, onto, or, con, among, already, co, afterwards, formerly, within, seems, into, others, while, whatever, except, down, hers, everyone, done, least, another, whoever, moreover, couldnt, throughout, anyhow, yourself, three, from, her, few, together, top, there, due, been, next, anyone, eleven, cry, call, therefore, interest, then, thru, themselves, hundred, really, sincere, empty, more, himself, elsewhere, mostly, on, fire, am, becoming, hereby, amongst, else, part, everywhere, too, kg, herself, former, those, he, me, myself, made, twenty, these, was, bill, cant, us, until, besides, nevertheless, below, anywhere, nine, can, whether, of, your, toward, my, say, something, and, whereafter, whenever, give, almost, wherever, is, describe, beforehand, herein, doesn, an, as, itself, at, have, in, seem, whence, ie, any, fill, again, hasnt, inc, thereby, thin, no, perhaps, latter, meanwhile, when, detail, same, wherein, beside, also, that, other, take, which, becomes, you, if, nobody, unless, whereas, see, though, may, after, upon, most, hereupon, eight, but, serious, nothing, such, why, off, a, don, whereby, third, i, whole, noone, sometimes, well, amoungst, yours, their, rather, without, so, five, the, first, with, make, once
+
+
+Note that LDA requires further preprocessing (described in chapter 5): creation of bi-grams and stemming using a Snowball stemmer.
+
+\chapter{Evaluation on Arxiv-MAG, Unpaywall-MAG, ACL-MAG at k=10}\label{chap:fulltexteval}
+This appendix contains the evaluation results at k=10 for all the algorithms on the three data sets which are made up of full text as well as pseudo full-text from MAG: Arxiv-MAG, Unpaywall-MAG and ACL-MAG.
+\begin{table}[h]
+\centering
+    \caption{Evaluation scores at k=10 for all models using the Arxiv-MAG data.}
+    \label{tab:mag50evalk10}
+\begin{center}
+    \begin{tabular}{lllll}
+    \toprule
+    Model & MRR@10 & Recall@10 & MAP@10 & NDCG@10 \\
+    \midrule
+    hd2vOUT  & 0.1379 & 0.2021 & 0.1351 & 0.1660 \\
+    BM25       & 0.1123 & 0.1709 & 0.1104 & 0.1357 \\
+    hd2vINOUT & 0.1073 & 0.1650 & 0.1054 & 0.1666 \\
+    Hybrid  & \textbf{0.1734} & \textbf{0.2801} & \textbf{0.1692} & \textbf{0.2139} \\
+    LDA     & 0.0164 & 0.0316 & 0.0162 & 0.0218 \\
+    Paper2Vec        & 0.0015 & 0.0049 & 0.0015 & 0.0026 \\
+    Doc2Vec       & 0.000008 & 0.000016 & 0.000008 & 0.000016 \\
+    \bottomrule
+    \end{tabular}
+\end{center}
+\end{table}
+\begin{table}[]
+\centering
+    \caption{Evaluation scores at k=10 for all models using the Unpaywall-MAG data.}
+    \label{tab:mag50evalk10}
+\begin{center}
+    \begin{tabular}{lllll}
+    \toprule
+    Model & MRR@10 & Recall@10 & MAP@10 & NDCG@10 \\
+    \midrule
+    hd2vOUT  & 0.0584 & 0.1267 & 0.0584 & 0.0860 \\
+    BM25       & 0.0644 & 0.1065 & 0.0644 & 0.0831 \\
+    hd2vINOUT & 0.0574 & 0.1218 & 0.0574 & 0.0838 \\
+    Hybrid  & \textbf{0.0820} & \textbf{0.1775} & \textbf{0.0820} & \textbf{0.1232} \\
+    Paper2Vec  & 0.0006 & 0.0018 & 0.0006 & 0.0010 \\
+    Doc2Vec       & 0.000012 & 0.000014 & 0.000012 & 0.000014 \\
+    \bottomrule
+    \end{tabular}
+\end{center}
+\end{table}
+\begin{table}[]
+\centering
+    \caption{Evaluation scores at k=10 for all models using the ACL-MAG data.}
+    \label{tab:mag50evalk10}
+\begin{center}
+    \begin{tabular}{lllll}
+    \toprule
+    Model & MRR@10 & Recall@10 & MAP@10 & NDCG@10 \\
+    \midrule
+    hd2vOUT  & 0.1328 & 0.2429 & 0.1328 & 0.1822 \\
+    BM25       & 0.1058 & 0.1978 & 0.1058 & 0.1438 \\
+    hd2vINOUT & 0.0909 & 0.1661 & 0.0909 & 0.1237 \\
+    Hybrid  & \textbf{0.1612} & \textbf{0.3178} & \textbf{0.1612} & \textbf{0.2309} \\
+    LDA     & 0.0212 & 0.0684 & 0.0209 & 0.0309 \\
+    LDAMallet       & 0.0438 & 0.1146 & 0.0422 & 0.0557 \\
+    Paper2Vec        & 0.0102 & 0.0360 & 0.0102 & 0.0188 \\
+    Doc2Vec       & 0.0003 & 0.0015 & 0.0003 & 0.0006 \\
+    \bottomrule
+    \end{tabular}
+\end{center}
+\end{table}

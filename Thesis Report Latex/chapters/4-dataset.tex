@@ -1,0 +1,139 @@
+\chapter{Data sets}\label{chap:dataset}
+
+The amount and quality of data used for training a deep learning/machine learning model is arguably more important than the quality of the actual algorithms used. So the preparation of the input data is a critical step in the whole process. 
+In the following section (4.1), we will discuss 4 existing data sets which are used as 'base' data sets. In Section 4.2, we will talk about the data preparation phase. In this phase, the base data sets are combined and made into a form usable for the approaches described in Chapter 5.
+
+\section{Description of base data sets}
+Four data sources are used in this thesis: MAG, Arxiv, ACL-ARC and Unpaywall. Details about the specific versions of the data sets that we use are given in Appendix~\ref{chap:offlineevalfilter}. These four 'base data sets' are described below.
+\subsection{The MAG Data set}
+The Microsoft Academic Graph data set (MAG), a relatively new data set, has close to 220 million papers by 240 million authors (as of 22 May 2019). Papers in the data set range all the way from 1800 to 2019. \footnote{Latest statistics for Microsoft Academic can be found at https://academic.microsoft.com/home}. MAG was created using a combination of automatic crawling (using Microsoft's search engine Bing), and manual file sourcing from different sources (publishers like ACM) \cite{Sinha2015}. MAG gets monthly updates, leading to an ever-increasing amount of paper coverage. 
+
+These papers encompass many different disciplines (fields of study in MAG parlance) and languages. As per Microsoft's 2015 paper \cite{Sinha2015}, the Microsoft Academic graph is modelled as a "heterogeneous graph consisting of six types of entities: field of study, author, institution (affiliation of author), paper, venue and event". The links between the entities are explained in the same paper. Since then, more entities have been added, including paper URLs and paper resources.  
+
+Furthermore, MAG supplies files containing individual citation contexts, with the citing and cited papers' internal MAG identifiers provided alongside. Also provided are files with references, abstracts and language indicators for the papers. A detailed analysis of the MAG data can be found in \cite{Herrmannova2016}, while \cite{Paszcza2016} compares MAG to other scholarly databases. An analysis of the citations in MAG has been carried out in \cite{Hug2017}. 
+
+All the data and metadata are provided by Microsoft in the form of monthly dump files on Azure, its cloud computing system. The dump files will be used in the data preparation phase, the phase which makes the data usable by the recommendation algorithms. The data preparation for MAG is described in Section 4.2.2. 
+
+There are a number of reasons why we think MAG will be used extensively in research. Apart from the huge amount of coverage across a myriad of disciplines (fields of study), there is a possibility to drill down into sub-disciplines for most of the papers. There are papers from multiple languages, and a comprehensive amount of metadata about authors, journals, conferences, affiliations etc. The additional presence of citation and reference information facilitates research into citation recommendation, along with other research fields like paper recommendation, bibliometrics and scientometrics. The one downside to using MAG has is that full text is not provided for any papers. When needed, this has to be obtained from other sources. However, the pros of using MAG (data from many disciplines, availability of citation and reference information, and the sheer amount of metadata) outweigh the cons. This thesis therefore built around this data set.
+
+In the citation recommendation context, the 2015 version of the MAG data set, just called Microsoft Academic, was used to get citation recommendations from a set of keywords in Chakraborty et al.\cite{ChakrabortyMNN15}. It was also used in Gao et al.~\cite{Gao15}, in which the impact of time on citation recommendation is studied by creating TF-IDF vectors and author profiles. Both these papers, however, do not consider the problem of context-aware citation recommendation. They also do not use the citation contexts provided in MAG.
+\subsection{Arxiv}
+Arxiv \footnote{https://arxiv.org/}, an initiative by Cornell University, provides open access to the full text of papers from  mainly 5 disciplines -- mathematics, computer science, physics, biology and economics. While citation contexts are not directly available, the full text in PDF as well as \LaTeX files can be obtained from Arxiv. 
+
+Although Arxiv does not quite match the breadth of coverage in MAG, it still contains a substantial number of papers. 
+The total number of submissions, as of 22 May 2019, is over 1.5 million \footnote{current stats available at https\://arxiv.org/stats/monthly\_submissions,\, https\://arxiv.org/help/stats}. 
+
+The authors of \cite{SaierF19} have extracted the plain text from the aforementioned \LaTeX source files. This is the version of Arxiv data that will be used in this thesis. Their \LaTeX extraction process is described in brief in Section 4.2.3, along with the final data preparation process (which includes combining Arxiv and MAG data) for the approaches in Chapter 5. At the end of their process, we get full text which is clean. This is in contrast to the MAG, where we don't have full text, and the data is not always clean. 
+\subsection{ACL Anthology}
+The ACL Anthology Reference corpus (ACL-ARC) is a comparatively tiny dataset which covers only computational linguistics and natural language processing. It contains close to 11,000 papers and stretches from 1965 to 2006. The ACL data we use for the thesis has been preprocessed as per \cite{Faerber2018} to contain a set of sentences, with references and metadata available in a separate file. This is further described in Section 4.2.4, which covers the data preparation phase for the ACL data and the process of combining it with MAG.
+\subsection{Unpaywall}
+Unpaywall \footnote{https://unpaywall.org} is a cross-domain open source database of 23,268,544 scholarly articles (at the time of writing). The organisation responsible for Unpaywall also provides a freely-downloadable database snapshot every few months in the Jsonlines format \footnote{https://unpaywall.org/products/snapshot (snapshot used: September 2018)}. 
+The Jsonlines file has a JSON record for each paper, with each record containing the paper's DOI and some other metadata, along with links from which the papers can be freely downloaded. The DOI can be used to link the papers in this Jsonlines file to other data sets such as MAG. The data preparation using Unpaywall and MAG is covered in Section 4.2.5. 
+\section{Data set preparation}\label{sec:data-set-creation}
+In this section, we will take a look at the methods behind the creation of the the final data sets from the base data sets described in the previous section. The first thing we do is to restrict the data sets to only computer science papers. There are multiple advantages to using only one discipline -- the recommendations are likely to be better, and the training time for the embedding-based algorithms is reduced. The price we pay is that we miss out on cross-domain recommendations. 
+
+The full-text base data sets (Arxiv, ACL-ARC, Unpaywall) are supplemented with additional content from MAG. This content is made up of what is referred to in this thesis as \textit{'pseudo full-text'}. The pseudo full-text for a paper consists of its title, abstract and all its citation contexts (i.e., citation contexts where it acts as a citing paper) from MAG. This is done so that we have at least some content for papers which have been cited by the papers in the full-text base data sets, but which are not in the respective base data sets themselves. 
+
+The process to create the MAG pseudo full-text, which is common to the data preparation phases of all the full-text data sets, is described in Section 4.2.1. The data preparation phases for the individual data sets are explained in Sections 4.2.2-4.2.5.
+
+Two additional data sets based on the MAG are created for evaluation. These data sets are called MAG50 and MAG-Cited, and they are explained in Section 4.2.6. These two data sets also play a big role in the final running recommender system, \textit{HybridCite}, which is described in the next chapter.
+
+The end result after the data preparation phase is a single training file for each of the data sets. All the training files have citation markers of the form $=-=$MAG ID$-=-$, as all the papers in even the non-MAG data sets are mapped to MAG IDs.
+
+Table~\ref{tab:MAGdatasets} contains some details about the training sets created for the MAG data sets (the main MAG data set, MAG50 and MAG-Cited). 
+Table~\ref{tab:nonmagdatasets} gives an overview of the training sets created from the full-text data sets in conjunction with MAG (pseudo full-text extracted from MAG).
+The filter criteria used to prepare these data sets are explained in detail in Appendix~\ref{chap:offlineevalfilter}.
+
+\textbf{Note about test set preparation}:
+A test set containing citation contexts is also created for each of the data sets. All the test set citation contexts are extracted from the respective data source (Arxiv/ACL AAN/MAG), and are subject to a few filter criteria as well. In addition to the filter criteria used for creating the training sets, each of these test contexts must have at least 9 words after removing stop words. We remove stop words quite aggressively, based on \cite{StoneDK11}. All the stop words removed are given in \ref{chap:preprocessing}.
+
+\begin{table}
+\centering
+    \begin{tabular}{ccc}
+    \toprule
+    Data set & \#Papers & Years \\
+    \midrule
+       MAG & 1,620,841 & 1800-2017 \\
+       MAG50 & 126,666 & 1800-2017 \\
+       MAGCited & 1,629,106 & 1800-2017\\
+    \bottomrule
+    \end{tabular}
+    \caption{Overview of MAG training sets (after data preparation phase). Filter criteria used for the data preparation can be found in Appendix~\ref{chap:offlineevalfilter}.}
+    \label{tab:MAGdatasets}
+\end{table}
+
+\begin{table}[]
+    \centering
+    \begin{tabular}{ccccc}
+    \toprule
+    Data set & \#Papers & \#Full-text papers & \#Pseudo full-text papers & Years \\
+    \midrule
+        ACL-MAG & 11,217 & 9,166 & 2,051 & 1965-2005 \\
+        Arxiv-MAG & 286,272 & 53,614 & 232,658 & 1991-2016 \\
+        Unpaywall-MAG & 1,185,090 & 397,687 & 787,403 & 1800-2017\\
+        \bottomrule
+    \end{tabular}
+    \caption{Overview of training sets which include full-text from the respective data sources and pseudo full-text from MAG. Filter criteria used for the data preparation can be found in Appendix~\ref{chap:offlineevalfilter}.}
+    \label{tab:nonmagdatasets}
+\end{table}
+
+\subsection{MAG \textit{Pseudo full-text} preparation}
+Since the MAG data set does not contain full text but contains citation contexts and plenty of metadata, a mechanism is needed to combine the contexts and metadata into a form usable by the algorithms in Chapter 5. So, the title, abstract and citation contexts are retrieved for each paper and concatenated to form text which acts as a substitute for the full text (hence the name, \textit{pseudo full-text}). 
+
+For each citation context, the MAG ID of its cited paper is inserted at its mid-point. If a citation context has 11 words, the citation marker is inserted after the 5th word. The reason that this has to be done is that the MAG citation data contains only one reference ID (cited paper ID) per citation context. If a citation context cites 2 papers, duplicate rows are present in the MAG citation data, each with one cited paper's reference ID associated with it. As there is no way to figure out which citation marker a reference ID corresponds to when there are two or more citations, we simply insert the reference ID at the mid-point of the context. 
+
+In case of the non-MAG data sets, the data preparation phase involves mapping to MAG, and getting additional data of papers cited in the respective data sets. For example, an Arxiv paper (with full text available) might cite a total of 10 papers, out of which only 2 are within the Arxiv data set. Let's assume 6 of the remaining 8 papers have data available in MAG. We map these papers to MAG (the specific mapping methodology is different according to the data set, and is explained in the respective subsections), from which we get their title, abstract and the citation contexts. These fields are concatenated to form psuedo full-text.
+
+The newly-obtained citation contexts in turn reference other papers within the MAG database. Again, the respective MAG IDs of these papers are inserted as citation markers at the exact mid-point of the respective citation context.  
+
+The reason we go through this process to get the pseudo full-text is that one of the embedding algorithms used in Section 5 (Hyperdoc2vec) requires representations for every citing and cited paper. This algorithm creates two types of embeddings -- one based on citation contexts and the other based on content, so we require the title and abstract (to use as content) as well as the citation context in the pseudo full-text. 
+
+Pseudo full-text plays an important role in training all our algorithms. Table~\ref{tab:nonmagdatasets} shows that two of the prepared non-MAG data sets finally contain more pseudo full-text papers than full-text papers.
+\subsection{MAG}
+To prepare the MAG \textbf{training set}, the dump files mentioned in Section 4.1.1 are first loaded into several PostgreSQL tables. From the PostgreSQL tables, the pseudo full-text (title, abstract and concatenated citation contexts) is prepared for each paper as described in Section 4.2.1. 
+All the algorithms, whether embedding-based, information retrieval-based or topic modelling-based, work better when there is as much text as available. While having the full text would have been ideal, MAG does not contain full text. Therefore, using the title and abstract with all the citation contexts as pseudo full-text is the best we can do.
+
+We do not use the entire MAG data for creating the training set. We use only computer science papers in English from 1800-2017 because this is a discipline which is familiar to the writer, and has a relatively large number of papers. A few other filter criteria are applied as well while preparing the training set. These filter criteria are explained in Appendix~\ref{chap:offlineevalfilter}.
+
+The \textbf{test set} uses citation contexts from computer science papers in English which were published in 2018 and 2019. The MAG citation contexts are not always clean, and a few unclean contexts do get through the cracks into the test set (as well as the training set). These contexts are best avoided, and a machine learning algorithm with handcrafted features was developed to discard 'incomplete' contexts. However, the machine learning algorithm was trained on a small set of citation contexts with manually selected labels. It wasn't clear if it would work well on a large amount of data or if it would generalise across the computer science sub-fields, so this ML algorithm was not applied.
+
+These incomplete contexts bring down the metric scores when the evaluation is done, but this can only be partially prevented. The restriction mentioned in the previous subsection is imposed: citation contexts with 9 or fewer words (excluding stop words) are not included. The papers which are not present in the training set are discarded as well.  
+
+The MAG citation data has a citing and cited MAG ID associated with each citation context. The cited MAG ID acts as the ground truth. As mentioned in the previous section, this citation data has separate (duplicate) records for contexts with two or more citation markers. In the test set preparation, these contexts are grouped (by the paper id and the context) resulting in a single record with multiple cited papers in the ground truth. 
+
+\subsection{Arxiv-MAG}
+Saier et al \cite{SaierF19} present an approach to convert \LaTeX source files provided by Arxiv into text files. They extract the text into text files and create a database in which they map the papers in the reference section of each paper to MAG. They also obtain the precise positions of the citation markers corresponding to each of the references in the paper text, and insert placeholders with unique IDs at these locations.
+
+These text files and the aforementioned mapping database act as the starting point for the preparation of the Arxiv-MAG \textbf{training file} in this thesis. The MAG ids from the references database are inserted at the positions in the Arxiv text files with unique IDs, replacing the citation placeholders. Arxiv provides a metadata file \footnote{https://arxiv.org/help/bulk\_data}, which is indexed in Apache Solr \footnote{https://lucene.apache.org/solr/} at this stage.
+
+A couple of filter conditions are applied on the data set of Arxiv papers -- only computer science papers from 1991-2016 are considered, and papers which have been cited less than five times are discarded. Appendix~\ref{chap:offlineevalfilter} shows all the filter criteria.
+
+As our final data set will contain additional data from MAG (pseudo full-text), it is necessary to map all the Arxiv IDs to MAG IDs. The title and published year are retrieved from the Arxiv Solr metadata index for each of the papers in the Arxiv corpus. These fields are normalized, and mapped to the MAG metadata tables by performing an exact match on the paper title and published year. If there is no match, another attempt is made to map just the Arxiv title to the MAG metadata title. All the Arxiv papers which cannot be mapped to MAG are not included in the training set. 
+
+Pseudo full-text is fetched from the MAG tables for the cited papers which are not within the reduced Arxiv data set, as explained in Section 4.2.1. This pseudo full-text includes only those citation contexts which cite papers within either the reduced Arxiv data set or the set of papers which the original Arxiv papers cite.
+
+To prepare the \textbf{test set}, citation contexts of computer science papers from 2017 are extracted from Arxiv. Like in the training set, the Arxiv IDs of the cited papers are mapped to MAG IDs, and act as the ground truth. The ground truth contains one paper in most cases, but can have one main reference, and possible 'adjacent' references. These adjacent references are ones that are at most 5 characters apart or are part of a group of citations. ”[25,26]”, ”[25], [26]” or ”[25] and [26]" are examples of cases where adjacent citations are present. Again, references which are not in the training set are discarded from the ground truth.  
+\subsection{ACL-MAG}
+In \cite{Faerber2018b} and \cite{Faerber2018}, the authors describe a method to detect citation contexts from ACL Anthology (and Arxiv) papers. They also provide the data for \cite{Faerber2018b} online \footnote{\url{http://citation-recommendation.org/publications/}}. In this data, they have obtained the references of each paper and mapped them to GC/DBLP.  The data has been divided into 3 files for each paper: a text file containing text and annotations for citation markers, a references file, and a metadata file. 
+
+To create the \textbf{training set}, we make use of just the text files and consider only the annotations which have been mapped to DBLP. The method to get the MAG ID in place of the DBLP annotations is described below. The text files are iterated through and the DBLP URL is obtained from the DBLP annotations. This DBLP URL is scraped, and the paper's title is obtained. This title is used to map to MAG in the same way as for Arxiv in Section 4.2.3. The annotations are replaced by the MAG IDs to obtain the full text. The training data contains all papers from 1965 to 2005.
+Again, additional MAG pseudo-text is added for these papers' reference papers, as described in Section 4.2.1.
+
+The \textbf{test set} contains contexts from ACL Anthology papers in 2006. The papers in the ground truth are fetched from the references and mapped to MAG in the same way as the training set. Any papers not in the training set are removed from the ground truth. Unlike Arxiv, all the test set contexts have only one paper in the ground truth. 
+\subsection{Unpaywall-MAG}
+The steps to prepare the \textbf{training data} from the Unpaywall JSONlines is described below. The DOIs in the Unpaywall JSONlines file are mapped to the MAG metadata tables directly and a mapping table is created. The Unpaywall JSON file has links from which the papers can be downloaded. Only DOIs which belong to papers from the computer science field of study in MAG, and written in English before 2018, are included in the mapping table.
+
+The required PDFs are downloaded using a program and stored. The GROBID \cite{GROBID} tool is then executed on the PDF files to convert them to tei.xml files. GROBID parses PDFs and finds references authomatically. The tei.xml files contain the full text with references replaced by generated reference IDs. These IDs are mapped to bibliographic data in the references section of the tei.xml files. 
+
+These tei.xml files produced by GROBID are iterated through and a single text file for all the data is produced in which the references are replaced by the respective MAG IDs. The MAG IDs are obtained, like in the case of Arxiv-MAG, by mapping the title and published year to the MAG metadata.
+Additional pseudo full-text data from MAG is added to the file using the same method as the other non-MAG data sets.
+
+The \textbf{test file} used is the same as the test file used for MAG in Section 4.2.2.
+
+\subsection{Additional MAG Data sets}
+
+\subsubsection{MAG-50}
+The data preparation is very similar to the normal MAG data set (see Appendix~\ref{chap:offlineevalfilter}), but only those papers which have at least 50 citations are included in the training set. This considerably reduces the total number of total papers in the prepared training set, but will produce better results using the approaches described in the next chapter. However, this means that papers without citations (for example, new papers) will never get recommended. This data set is used to do a case study comparing the results to the main MAG data set where no restriction is made on the number of citations. It is also used in the final recommender system.
+
+\subsubsection{MAG with cited contexts (MAG-Cited)}
+\cite{HuangKCMGR12} and \cite{Huang2015} claim that "a citation’s context contains explicit words explaining the citation". They say that the words in the context explain the cited paper rather than the citing paper. This thesis also does a small case study to prove this claim by creating the MAG file in a similar way to Section 4.2.2. But instead of using each paper's own citation contexts in its pseudo full-text, citation contexts from papers which cite the paper are used. For example, consider a situation wherein a paper A cites two papers B and C, but A is \textit{cited by} 3 other papers D, E and F. The content of A is made up of A's title and abstract, and citation contexts from D, E and F which reference A (unlike the data set in Section 4.2.2 which would have A's title and abstract and citation contexts).
